@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 class HomeController extends GetxController {
   User? user;
   var isDataLoading = false.obs;
+  var page = 1;
 
   @override
   Future<void> onInit() async {
@@ -28,12 +29,18 @@ class HomeController extends GetxController {
     try {
       isDataLoading(true);
       http.Response response = await http.get(
-          Uri.tryParse('http://dummyapi.io/data/v1/user')!,
+          Uri.tryParse('http://dummyapi.io/data/v1/user?page=$page')!,
           headers: {'app-id': kAPP_ID});
       if (response.statusCode == 200) {
         ///data successfully
         var result = jsonDecode(response.body);
-        user = User.fromJson(result);
+        var data = User.fromJson(result);
+        if (user == null) {
+          /// ??=
+          user = data;
+        } else {
+          user!.data!.addAll(data.data ?? []);
+        }
       } else {
         ///error
         print("erroroororooror");
